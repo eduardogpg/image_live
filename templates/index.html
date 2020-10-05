@@ -1,0 +1,22 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+    <div class="col">
+        
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                {% csrf_token %} 
+
+                <label for="exampleFormControlFile1">Example file input</label>
+                
+                <input type="file" class="form-control-file" id="exampleFormControlFile1" name='file'>
+            </div>
+
+            <button type="submit" class="btn btn-primary mb-2">Cargar</button>
+          </form>
+    </div>
+{% endblock%}
