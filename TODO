@@ -1,1 +1,13 @@
-Subir la imagen con permisos para que se puede consultar
+JUST ONE PICTURE
+
+1.- Subir la imagen con permisos para que se puede consultar
+    1.1 Investigando como obtener un JSON response
+2.- Obtener la URL de la imagen
+3.- Crear el registro en el modelo Image
+4.- Listar Imagen **
+
+Trabajo en segundo plano con celery
+
+
+
+        

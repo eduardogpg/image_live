@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 
 {% block content %}
-    <div class="col">
+    <div class="col mt-4">
         
         {% if message %}
             <p>{{ message }}</p>
@@ -11,9 +11,21 @@
             <div class="form-group">
                 {% csrf_token %} 
 
-                <label for="exampleFormControlFile1">Example file input</label>
-                
-                <input type="file" class="form-control-file" id="exampleFormControlFile1" name='file'>
+                <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="imageGroup">Upload</span>
+                        </div>
+
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="image"
+                            aria-describedby="imageGroup" name='file'
+                            accept=".png, .jpg, .jpeg"
+                        >
+
+                        <label class="custom-file-label" for="image">Choose file</label>
+                    </div>
+                </div>
+
             </div>
 
             <button type="submit" class="btn btn-primary mb-2">Cargar</button>
