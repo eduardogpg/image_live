@@ -37,3 +37,7 @@ class Image(models.Model):
     @classmethod
     def get_extension(cls, file_name):
         return file_name.split('.')[-1]
+
+    @property
+    def url(self):
+        return f'https://{self.bucket}.s3.amazonaws.com/{self.key}'
