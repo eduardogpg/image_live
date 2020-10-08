@@ -1,6 +1,6 @@
 import boto3
 
-def upload_image(bucket, local_path, content_type, mediafile_key):
+def upload_file(bucket, local_path, content_type, mediafile_key):
     try:
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(bucket)
@@ -13,17 +13,28 @@ def upload_image(bucket, local_path, content_type, mediafile_key):
         )
     
     except Exception as err:
-        print('Error s3')
         print(err)
         return None
 
-def get_images(bucket):
+def show_objects(bucket):
     try:
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(bucket)
 
         for object in bucket.objects.all():
             print(object)
+
+    except Exception as err:
+        print(err)
+        return None
+
+def create_folder(bucket, directory_name):
+    try:
+        s3 = boto3.client('s3')
+        key = directory_name + '/'
+        
+        s3.put_object(Bucket=bucket, Key=key)
+        return  key
     
     except Exception as err:
         print(err)

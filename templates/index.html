@@ -1,34 +1,54 @@
 {% extends 'base/base.html' %}
 
 {% block content %}
-    <div class="col mt-4">
-        
-        {% if message %}
-            <p>{{ message }}</p>
-        {% endif %}
+<div class="col mt-4">
+    
+    {% include 'images/snippets/modals/form.html' %}
 
-        <form method="POST" enctype="multipart/form-data">
-            <div class="form-group">
-                {% csrf_token %} 
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            {% csrf_token %} 
 
-                <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="imageGroup">Upload</span>
-                        </div>
-
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="image"
-                            aria-describedby="imageGroup" name='file'
-                            accept=".png, .jpg, .jpeg"
-                        >
-
-                        <label class="custom-file-label" for="image">Choose file</label>
-                    </div>
+            <div class="input-group">
+                
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="imageGroup">Upload</span>
                 </div>
 
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="image" aria-describedby="imageGroup" name='file' accept=".png, .jpg, .jpeg">
+                    <label class="custom-file-label" for="image">Choose file</label>
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-primary mb-2">Cargar</button>
-          </form>
-    </div>
+        </div>
+        
+        <div><a href="" data-toggle="modal" data-target="#newAlbum">Nuevo album</a></div>
+        <button type="submit" class="btn btn-primary mb-2">Cargar</button>
+    </form>
+</div>
 {% endblock%}
+
+{% block javascript %}
+<script>
+    const albumForm = document.getElementById('album-form');
+    const saveAlbum = document.getElementById('save-album');
+
+    saveAlbum.addEventListener('click', function(event){
+        
+        fetch(albumForm.action, {
+            method: 'POST',
+            body: new FormData(albumForm)
+        
+        }).then(response => response.json())
+        .then(function(data) {
+            
+            if (data.success == true ){
+
+            }
+
+        })
+
+    });
+</script>
+{% endblock %}
