@@ -2,16 +2,20 @@ JUST ONE PICTURE
 
 * subir la imagen con un drop (JavaScript)
     * Ajax -> Fetch
-* El usuario podrá crear un album -> Django -> Python
-* O podrá elegir en que album va a guardad la imagen -> Django -> Python
+
 * Listar albums
-* Seleccionar el albumn a visualizar
+* Seleccionar el album a visualizar
+
 * Eliminar la imagen
 * Descagarla
 * Descarga múltiple
+
 * Presentación de la image
 
 Trabajo en segundo plano con celery
 
 Mover las vista al views de la Imagen
 Agregar render Cripy
+
+->  Estilo galeria y se agrega el Preview / Propuesta Julio
+->  Estilo row col card  / Propuesta Gilachus

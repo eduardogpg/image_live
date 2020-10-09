@@ -36,3 +36,7 @@ class Album(models.Model):
             'key': self.key,
             'bucket': self.bucket
         }
+    
+    @property
+    def images(self):
+        return self.image_set.all()

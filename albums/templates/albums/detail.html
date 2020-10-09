@@ -1,0 +1,12 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="col">
+    <h3>{{ object.title }}</h3>    
+    
+    {% for image in images %}
+        {% include 'images/snippets/image.html' %}
+    {% endfor %}
+
+</div>
+{% endblock %}

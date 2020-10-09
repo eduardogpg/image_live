@@ -1,0 +1,40 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="col">
+
+    <div class="row">
+        <div class="col">
+            <h2>Galería</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                    <th scope="col">Key</th>
+                    <th scope="col">Bucket</th>
+                    <th scope="col">Fecha de creación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for album in object_list %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'albums:detail' album.pk %}">{{ album.title }}</a>
+                            </td>
+                            <td> {{ album.bucket }} </td>
+                            <td> {{ album.created_at }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+    
+{% endblock %}
