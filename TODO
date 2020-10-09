@@ -12,3 +12,5 @@ JUST ONE PICTURE
 * Presentación de la image
 
 Trabajo en segundo plano con celery
+
+Mover las vista al views de la Imagen

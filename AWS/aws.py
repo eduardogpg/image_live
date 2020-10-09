@@ -1,15 +1,15 @@
 import boto3
 
-def upload_file(bucket, local_path, content_type, mediafile_key):
+def upload_file(bucket, mediafile_key, content_type, local_path):
     try:
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(bucket)
 
         return bucket.put_object(
             ACL='public-read',
-            Body=open(local_path, 'rb'),
+            Key=mediafile_key,
             ContentType=content_type,
-            Key=mediafile_key
+            Body=open(local_path, 'rb'),
         )
     
     except Exception as err:

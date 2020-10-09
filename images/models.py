@@ -7,10 +7,11 @@ from albums.models import Album
 
 class ImageManager(models.Manager):
 
-    def create_by_aws(self, local_path, file):
+    def create_by_aws(self, bucket, file, album, local_path):
         
-        response = upload_image(settings.BUCKET, local_path,
-                                    file.content_type, file._name)
+        response = upload_file(bucket, mediafile_key,
+                                file.content_type, local_path)
+
         if response:
             return self.create(
                 key=response._key,

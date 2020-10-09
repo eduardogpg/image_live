@@ -2,20 +2,18 @@ import os
 from django.shortcuts import render
 
 from images.models import Image
+from albums.models import Album
+
+from images.forms import UploadFileForm
 
 def index(request):
-    context = { 'title': 'Nuevo archivo' }
+    
+    form = UploadFileForm(request.POST or None)
 
-    if request.method == 'POST':
-        file = request.FILES['file']
-
-        local_path = upload_file(file)
-        if local_path:
-            
-            if Image.objects.create_by_aws(local_path, file):
-                context['message'] = 'Imagen procesada exitosamente!'
-
-            delete_file(local_path)
+    context = { 
+        'title': 'Nuevo archivo', 
+        'form': form,
+    }
             
     return render( request, 'index.html', context)
 
