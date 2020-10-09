@@ -27,7 +27,7 @@
                                 <a href="{% url 'albums:detail' album.pk %}">{{ album.title }}</a>
                             </td>
                             <td> {{ album.bucket }} </td>
-                            <td> {{ album.created_at }}</td>
+                            <td> {{ album.created_at | date:'d M Y' }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
