@@ -1,5 +1,7 @@
 import os
+from django.conf import settings
 from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 
 from images.models import Image
 from albums.models import Album
@@ -8,27 +10,32 @@ from images.forms import UploadFileForm
 
 def index(request):
     
-    form = UploadFileForm(request.POST or None)
+    albums = Album.objects.all()
 
     context = { 
         'title': 'Nuevo archivo', 
-        'form': form,
+        'form': UploadFileForm(albums),
     }
+
+    if request.method == 'POST':
+        form = UploadFileForm(albums, request.POST, request.FILES)
+
+        if form.is_valid():
+            
+            title = form.cleaned_data['title']
+            album = form.cleaned_data['album']
+            file = form.cleaned_data['file']
+
+            album = get_object_or_404(Album, title=album)
+
+            image = Image.objects.create_by_aws(settings.BUCKET,
+                                                file, title, album)
+
+            if image:
+                print('La img se guardo de forma exitosa!')
+
+        else:
+            print('No es valido!!!!')
+
             
     return render( request, 'index.html', context)
-
-def delete_file(local_path):
-    os.remove(local_path)
-
-def upload_file(file):
-    try:
-        local_path = f'tmp/{file}'
-        with open(local_path, 'wb+') as destination:
-            for chunk in file.chunks():
-                destination.write(chunk)
-
-        return local_path
-
-    except Exception as err:
-        print('No fue posible crear el archivo.')
-        print(err)

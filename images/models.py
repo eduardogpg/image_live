@@ -6,20 +6,23 @@ from AWS import upload_file
 from albums.models import Album
 
 class ImageManager(models.Manager):
-
-    def create_by_aws(self, bucket, file, album, local_path):
+    
+    def create_by_aws(self, bucket, file, title, album):
         
-        response = upload_file(bucket, mediafile_key,
-                                file.content_type, local_path)
+        title_sanitaized = title.lower().replace(' ', '_')
+        
+        key = f'{album.key}{title_sanitaized}'
+        response = upload_file(bucket, key, file)
 
         if response:
             return self.create(
                 key=response._key,
+                album=album,
                 bucket=response._bucket_name,
                 name=file._name,
                 size=file.size,
                 content_type=file.content_type,
-                extension=Image.get_extension(file._name)
+                extension='png'
             )
 
 class Image(models.Model):

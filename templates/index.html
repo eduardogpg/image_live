@@ -12,6 +12,11 @@
                 <div class="form-group">
                     {{ input.label_tag }}
                     {{ input }}
+
+                    {% if input.errors %}
+                        {{ input.errors }}
+                    {% endif %}
+
                 </div>
             {% endfor %}
 
@@ -19,6 +24,9 @@
             <button type="submit" class="btn btn-primary mb-2">Cargar</button>
         </div>
         
+        <a href="#" data-toggle="modal" data-target="#newAlbum" data-whatever="@mdo">Nuevo album</a>
+
+
     </form>
 </div>
 {% endblock%}

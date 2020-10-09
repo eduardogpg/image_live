@@ -30,9 +30,9 @@ class Album(models.Model):
     @property
     def serializer(self):
         return {
-            'id': album.id,
-            'title': album.title,
-            'description': album.description,
-            'key': album.key,
-            'bucket': album.bucket
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'key': self.key,
+            'bucket': self.bucket
         }
