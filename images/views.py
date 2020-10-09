@@ -1,14 +1,40 @@
+from django.conf import settings
 from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 
-from .models import Image
+from images.models import Image
 
-def list(request):
+from .models import Album
+from .forms import UploadFileForm
 
-    images = Image.objects.all().paginate().order_by('-id')
-
-    context = {
-        'title': 'Listado de imagenes',
-        'images': images
-    }
+def create(request):
     
-    return render(request, 'images/list.html', context)
+    albums = Album.objects.all()
+
+    context = { 
+        'title': 'Nuevo archivo', 
+        'form': UploadFileForm(albums),
+    }
+
+    if request.method == 'POST':
+        form = UploadFileForm(albums, request.POST, request.FILES)
+
+        if form.is_valid():
+            
+            title = form.cleaned_data['title']
+            album = form.cleaned_data['album']
+            file = form.cleaned_data['file']
+
+            album = get_object_or_404(Album, title=album)
+
+            image = Image.objects.create_by_aws(settings.BUCKET,
+                                                file, title, album)
+
+            if image:
+                print('La img se guardo de forma exitosa!')
+
+        else:
+            print('No es valido!!!!')
+
+            
+    return render( request, 'index.html', context)

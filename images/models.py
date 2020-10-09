@@ -9,7 +9,10 @@ class ImageManager(models.Manager):
     
     def create_by_aws(self, bucket, file, title, album):
         
+        type = file.content_type.split('/')[-1]
+
         title_sanitaized = title.lower().replace(' ', '_')
+        title_sanitaized = f'{title_sanitaized}.{type}'
         
         key = f'{album.key}{title_sanitaized}'
         response = upload_file(bucket, key, file)
@@ -40,10 +43,6 @@ class Image(models.Model):
     def __str__(self):
         return self.key
     
-    @classmethod
-    def get_extension(cls, file_name):
-        return file_name.split('.')[-1]
-
     @property
     def url(self):
         return f'https://{self.bucket}.s3.amazonaws.com/{self.key}'

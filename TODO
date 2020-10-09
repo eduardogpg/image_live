@@ -3,14 +3,9 @@ JUST ONE PICTURE
 * subir la imagen con un drop (JavaScript)
     * Ajax -> Fetch
 
-* Listar albums
-* Seleccionar el album a visualizar
-
 * Eliminar la imagen
 * Descagarla
 * Descarga múltiple
-
-* Presentación de la image
 
 Trabajo en segundo plano con celery
 
