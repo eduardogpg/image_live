@@ -1,12 +1,80 @@
 {% extends 'base/base.html' %}
 
 {% block content %}
+<style>
+    z { cursor: pointer; }    
+</style>
+
 <div class="col">
-    <h3>{{ object.title }}</h3>    
-    
-    {% for image in images %}
-        {% include 'images/snippets/image.html' %}
-    {% endfor %}
+    <div class="row">
+        <div class="col">
+            <h3> {{ object.title }}</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-6">
+
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for image in images %}
+                        <tr>
+                            <td>
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="{{ image.key }}">
+                                    <label class="custom-control-label" for="{{ image.key }}"></label>
+                                    <input type="hidden" value="{{  image.url }}" id="url-image-{{ image.id }}">
+                                    
+                                    <z class="image-selected" id="image-{{ image.id }}">
+                                        {{ image.name }}
+                                    </z>
+                                    
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+        <div class="col-6">
+            <img src="{{ image.url }}" alt="" id="image-preview" width="550" height="350px">
+
+            <div class="row">
+                <div class="col text-center">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><a href="">Preview</a></li>
+                        <li class="list-group-item"><a href="">Eliminar</a></li>
+                        <li class="list-group-item"><a href="">Descargar</a></li>
+                      </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+
+    const imagePreview = document.getElementById('image-preview')
+
+    var images = document.getElementsByClassName("image-selected");
+    
+    for (var i = 0; i < images.length; i++) {
+        images[i].addEventListener('click', function(event){
+            var urlInput = document.getElementById('url-' + this.id);
+
+            imagePreview.src = urlInput.value;
+
+        });
+    }   
+
+</script>
 {% endblock %}

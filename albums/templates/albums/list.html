@@ -24,6 +24,7 @@
                     {% for album in object_list %}
                         <tr>
                             <td>
+                                <i class="far fa-folder"></i>
                                 <a href="{% url 'albums:detail' album.pk %}">{{ album.title }}</a>
                             </td>
                             <td> {{ album.bucket }} </td>

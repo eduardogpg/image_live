@@ -16,11 +16,11 @@ class AlbumListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        context['title'] = 'Galeria'
+        context['title'] = 'Galería'
         return context
 
     def get_queryset(self):
-        return Album.objects.all() #filter()
+        return Album.objects.all()
 
 class AlbumDetailView(DetailView):
     model = Album
@@ -28,7 +28,9 @@ class AlbumDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
         context['title'] = self.get_object().title
+        context['image'] = self.get_object().images.first()
         context['images'] = self.get_object().images
 
         return context

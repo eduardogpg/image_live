@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.shortcuts import render
+from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
 
 from images.models import Image
@@ -31,7 +32,7 @@ def create(request):
                                                 file, title, album)
 
             if image:
-                print('La img se guardo de forma exitosa!')
+                return redirect('albums:detail', album.pk)
 
         else:
             print('No es valido!!!!')

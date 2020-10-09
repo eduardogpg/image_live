@@ -40,4 +40,4 @@ class Album(models.Model):
     
     @property
     def images(self):
-        return self.image_set.all()
+        return self.image_set.all().order_by('-id')
