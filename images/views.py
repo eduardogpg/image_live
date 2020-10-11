@@ -2,16 +2,21 @@ from django.http import JsonResponse
 
 from django.urls import reverse
 from django.conf import settings
+
+from django.contrib import messages
+
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
+
+from django.http import HttpResponseRedirect
 
 from django.views.generic.detail import DetailView
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Image
+from albums.models import Album
 
-#from .models import Album
 from .forms import UploadFileForm
 
 class ImageDetailView(DetailView):
@@ -38,34 +43,24 @@ def show(request, pk):
 
 def delete(request, pk):
     image = get_object_or_404(Image, pk=pk)
-    
-        
 
 def create(request):
     
-    albums = Album.objects.all()
-
-    context = { 
-        'title': 'Nuevo archivo', 
-        'form': UploadFileForm(albums),
-    }
-
     if request.method == 'POST':
-        form = UploadFileForm(albums, request.POST, request.FILES)
+        form = UploadFileForm(request.POST, request.FILES)
 
         if form.is_valid():
-            album = get_object_or_404(Album, title=album)
+            album = get_object_or_404(Album, id=form.cleaned_data['album_id'])
 
             image = Image.objects.create_by_aws(settings.BUCKET,
                                                 form.cleaned_data['file'],
                                                 form.cleaned_data['title'], 
-                                                form.cleaned_data['album'])
+                                                album)
 
             if image:
+                messages.success(request, 'Imagen almacenada exitosamente.')
                 return redirect('albums:detail', album.pk)
-
-        else:
-            print('No es valido!!!!')
-
-            
-    return render( request, 'index.html', context)
+    
+    messages.success(request, 'No fue posible completar la operación.')
+    
+    return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))

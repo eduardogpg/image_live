@@ -10,6 +10,7 @@
 
 {% block content %}
 
+{% include 'images/snippets/modals/form.html' %}
 {% include 'images/snippets/modals/delete.html' %}
 
 <div class="row mt-2">
@@ -21,8 +22,7 @@
 <div class="row">
     <div class="col-9">
         <hr>
-        <button class="btn btn-primary">Nueva imagen</button>
-
+        <button class="btn btn-primary" data-toggle="modal" data-target="#createModal">Nueva imagen</button>
         <div class="row mt-2">
             <div class="col">
                 <table class="table">

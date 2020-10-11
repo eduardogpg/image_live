@@ -21,11 +21,11 @@ class ImageManager(models.Manager):
             return self.create(
                 key=response._key,
                 album=album,
+                title=title,
                 bucket=response._bucket_name,
-                name=file._name,
+                #name=file._name,
                 size=file.size,
                 content_type=file.content_type,
-                extension='png'
             )
 
 class Image(models.Model):
@@ -35,7 +35,6 @@ class Image(models.Model):
     size = models.IntegerField()
     album = models.ForeignKey(Album, on_delete=models.CASCADE, default=None)
     content_type = models.CharField(max_length=10, null=False, blank=False, default='')
-    extension = models.CharField(max_length=3, null=False, blank=False, default='')
     created_at = models.DateTimeField(auto_now_add=True)
 
     objects = ImageManager()

@@ -7,6 +7,8 @@ from django.http import JsonResponse
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 
+from images.forms import UploadFileForm
+
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Album
@@ -35,6 +37,11 @@ class AlbumDetailView(DetailView):
         context['title'] = self.get_object().title
         context['image'] = self.get_object().images.first()
         context['images'] = self.get_object().images
+        context['form'] = UploadFileForm(
+            {
+                'album_id': self.get_object().id
+            }
+        )
 
         return context
 
@@ -49,14 +56,6 @@ def create(request):
             if album:
                 messages.success(request, 'Albúm creado exitosamente.')
                 return redirect('albums:detail', album.id)
-            else:
-                print('Error al crear el folder')
-
-        else:
-            print('Aquí vamos, no se llegaron los params')
-    
-    else:
-        print('No se que pedossssss!!!')
 
     messages.error(request, 'No es posible completar la operación.')
     return redirect('albums:list')
