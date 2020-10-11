@@ -31,7 +31,7 @@ class ImageManager(models.Manager):
 class Image(models.Model):
     key = models.CharField(max_length=50, null=False, blank=False)
     bucket = models.CharField(max_length=50, null=False, blank=False)
-    name = models.CharField(max_length=100)
+    title = models.CharField(max_length=100)
     size = models.IntegerField()
     album = models.ForeignKey(Album, on_delete=models.CASCADE, default=None)
     content_type = models.CharField(max_length=10, null=False, blank=False, default='')

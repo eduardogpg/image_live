@@ -1,4 +1,7 @@
 from django.shortcuts import render
+from django.shortcuts import redirect
+
+from django.contrib import messages
 from django.http import JsonResponse
 
 from django.views.generic.list import ListView
@@ -15,8 +18,8 @@ class AlbumListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
         context['title'] = 'Galería'
+
         return context
 
     def get_queryset(self):
@@ -35,14 +38,25 @@ class AlbumDetailView(DetailView):
 
         return context
 
-@csrf_exempt
 def create(request):
-    if request.method == 'POST' and request.POST.get('title'):
+    if request.method == 'POST':
+        if request.POST.get('title') and request.POST.get('description'):
         
-        album = Album.objects.create_by_aws('livedjango', request.POST['title'],
-                                            request.POST.get('description', ''))
-        
-        if album:
-            return JsonResponse({'success': True, 'album': album.serializer })
+            album = Album.objects.create_by_aws('livedjango',
+                                                request.POST['title'],
+                                                request.POST['description'])
+            
+            if album:
+                messages.success(request, 'Albúm creado exitosamente.')
+                return redirect('albums:detail', album.id)
+            else:
+                print('Error al crear el folder')
+
+        else:
+            print('Aquí vamos, no se llegaron los params')
     
-    return JsonResponse({'success': False})
+    else:
+        print('No se que pedossssss!!!')
+
+    messages.error(request, 'No es posible completar la operación.')
+    return redirect('albums:list')

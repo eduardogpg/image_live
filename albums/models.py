@@ -12,8 +12,7 @@ class AlbumManager(models.Manager):
         key = create_folder(bucket, title_sanitaized)
         
         if key:
-            return Album.objects.create(title=title, key=key,
-                                        bucket=bucket, description=description)
+            return Album.objects.create(title=title, key=key, bucket=bucket, description=description)
         
 class Album(models.Model):
     title = models.CharField(max_length=50, null=False, blank=False)

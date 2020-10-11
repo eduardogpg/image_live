@@ -9,7 +9,7 @@ def upload_file(bucket, mediafile_key, file):
             ACL='public-read',
             Key=mediafile_key,
             ContentType=file.content_type,
-            Body=file,#open(local_path, 'rb'),
+            Body=file,
         )
     
     except Exception as err:
@@ -30,12 +30,13 @@ def show_objects(bucket):
 
 def create_folder(bucket, directory_name):
     try:
+    
         s3 = boto3.client('s3')
         key = directory_name + '/'
-        
+    
         s3.put_object(Bucket=bucket, Key=key)
         return  key
-    
+
     except Exception as err:
         print(err)
         return None

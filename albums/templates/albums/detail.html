@@ -14,7 +14,7 @@
 
 <div class="row mt-2">
     <div class="col">
-        <h4>Vista de la carpeta</h4>
+        <h4>Vista {{ object.title }}</h4>
     </div>
 </div>
 
@@ -97,7 +97,9 @@ $( document ).ready(function() {
             modal.find('#image-to-delete').text(data.key);
             href =  modal.find('.delete-image-button')[0].href
 
-            
+            console.log(
+                data.delete_url
+            );
 
         });
     

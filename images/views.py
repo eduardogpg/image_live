@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 
+from django.urls import reverse
 from django.conf import settings
 from django.shortcuts import render
 from django.shortcuts import redirect
@@ -31,18 +32,14 @@ def show(request, pk):
         {
             'id': image.id,
             'key': image.key,
+            'delete_url': reverse('images:delete', kwargs={'pk': image.id})
         }
     )
 
-@csrf_exempt
 def delete(request, pk):
     image = get_object_or_404(Image, pk=pk)
     
-    # Owner
-    if image.delete():
-        return JsonResponse({ 'success': True } )
-    else:
-        return JsonResponse({ 'success': True } )
+        
 
 def create(request):
     
