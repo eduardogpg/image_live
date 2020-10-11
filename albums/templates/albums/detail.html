@@ -1,80 +1,108 @@
 {% extends 'base/base.html' %}
 
-{% block content %}
+{% block style %}
 <style>
-    z { cursor: pointer; }    
+    .image-key {
+        cursor: pointer;
+    }
 </style>
+{% endblock %}
 
-<div class="col">
-    <div class="row">
-        <div class="col">
-            <h3> {{ object.title }}</h3>
-        </div>
+{% block content %}
+
+{% include 'images/snippets/modals/delete.html' %}
+
+<div class="row mt-2">
+    <div class="col">
+        <h4>Vista de la carpeta</h4>
     </div>
+</div>
 
-    <div class="row">
-        <div class="col-6">
+<div class="row">
+    <div class="col-9">
+        <hr>
+        <button class="btn btn-primary">Nueva imagen</button>
 
-            <table class="table">
-                <thead class="thead-dark">
-                    <tr>
+        <div class="row mt-2">
+            <div class="col">
+                <table class="table">
+                    <thead>
+                      <tr>
                         <th scope="col"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for image in images %}
-                        <tr>
-                            <td>
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="{{ image.key }}">
-                                    <label class="custom-control-label" for="{{ image.key }}"></label>
-                                    <input type="hidden" value="{{  image.url }}" id="url-image-{{ image.id }}">
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Fecha creación</th>
+                        <th scope="col"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for image in images %}
+                            <tr>
+                                <th scope="row">
+                                    <input type="checkbox" class="form-check-input" id="image-{{ image.id }}">
+                                </th>
+                                <td>
+                                    <div class="image-key">
+                                        {{ image.key }}
+                                    </div>
+                                </td>
+                                <td> {{ image.created_at | date }}</td>
+                                <td>
                                     
-                                    <z class="image-selected" id="image-{{ image.id }}">
-                                        {{ image.name }}
-                                    </z>
-                                    
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" >
+                                          ...
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="{% url 'images:detail' image.pk %}">Vista previa</a>
+                                          <a class="dropdown-item" href="#">Descargar</a>
+                                          <a class="dropdown-item" href="#">Cambiar nombre</a>
+                                          <div class="dropdown-divider"></div>
+                                          <a class="dropdown-item" href="{% url 'images:show' image.id %}" data-toggle="modal" id="{{ image.id }}" data-target="#deleteModal">Eliminar</a>
+                                        </div>
+                                    </div>
 
-        </div>
-        <div class="col-6">
-            <img src="{{ image.url }}" alt="" id="image-preview" width="550" height="350px">
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
-            <div class="row">
-                <div class="col text-center">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><a href="">Preview</a></li>
-                        <li class="list-group-item"><a href="">Eliminar</a></li>
-                        <li class="list-group-item"><a href="">Descargar</a></li>
-                      </ul>
-                </div>
             </div>
         </div>
     </div>
 
+    <div class="col-2 text-center">
+        <img width="300" height="300" src="https://livedjango.s3.us-east-2.amazonaws.com/prueba_live_django/perrito" class="img-responsive" style="padding-top: 5px">
+    </div>
+
 </div>
+
 {% endblock %}
 
 {% block javascript %}
 <script>
 
-    const imagePreview = document.getElementById('image-preview')
-
-    var images = document.getElementsByClassName("image-selected");
+$( document ).ready(function() {
     
-    for (var i = 0; i < images.length; i++) {
-        images[i].addEventListener('click', function(event){
-            var urlInput = document.getElementById('url-' + this.id);
+    $('#deleteModal').on('show.bs.modal', function (event) {
+        
+        var button = $(event.relatedTarget)
+        var image = button[0];
+        var modal = $(this)
 
-            imagePreview.src = urlInput.value;
+        fetch(image.href)
+        .then(response => response.json())
+        .then(function(data){
+            
+            modal.find('#image-to-delete').text(data.key);
+            href =  modal.find('.delete-image-button')[0].href
+
+            
 
         });
-    }   
+    
+    })
+});
 
 </script>
 {% endblock %}
