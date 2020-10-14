@@ -57,11 +57,14 @@ class Image(models.Model):
         return self.name.split('.')[0]
 
     def update_name(self, new_name):
-        new_image_key = Image.generate_key(self.album, new_name)
+        new_image_key = Image.generate_key(new_name, self.album)
         
-        if rename_file(self.bucket, new_image_key, self.key):
-            self.key = new_image_key
-            self.save()
+        #if rename_file(self.bucket, new_image_key, self.key):
+        
+        self.name = new_name# key = new_image_key
+        self.save()
+
+        return self.key
 
 def delete_mediafile_object(sender, instance, using, *args, **kwargs):
     if delete_mediafile(instance.bucket, instance.key) is None:

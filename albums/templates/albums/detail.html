@@ -44,7 +44,7 @@
                                 </th>
                                 <td>
                                     <input type="hidden" value="{{ image.url }}" id="preview-{{ image.id }}">
-                                    <div class="image-key" id='name-{{ image.id }}'>
+                                    <div class="image-key" id='name-{{ image.id }}' image-id='{{ image.id }}' >
                                         {{ image.name }}
                                     </div>
                                     <form action="{% url 'images:update' image.id %}" method="POST">{% csrf_token %}<input type="hidden" value="{{ image.title }}" name='name' id="input-{{ image.id }}"></form>
@@ -78,6 +78,19 @@
         {% if image %}
             <img width="300" height="300" id="preview" src="{{ image.url }}" class="img-responsive" style="padding-top: 5px">
         {% endif %}
+
+        <div class="row">
+            <div class="col text-center">
+                <ul>
+                    <li>
+                        <a href="" class="btn disabled">Descargar</a>
+                    </li>
+                    <li>
+                        <a href="" class="btn disabled">Eliminar</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -102,7 +115,7 @@ $( document ).ready(function() {
         .then(response => response.json())
         .then(function(data){
             
-            modal.find('#image-to-delete').text(data.key);
+            modal.find('#image-to-delete').text(data.name);
             modal.find('.delete-image-button')[0].href = data.delete_url
 
         });
@@ -120,14 +133,13 @@ $( document ).ready(function() {
         
     });
 
-
     $('.image-key').click(function(event) {
+        
         imageId = this.getAttribute('image-Id');
+
         imagePreview = document.getElementById('preview-' + imageId);
         preview.src = imagePreview.value;
     });
-
-
 
     $('.download').click(function(event) {
         event.preventDefault();

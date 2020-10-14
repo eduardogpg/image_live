@@ -41,7 +41,7 @@ def show(request, pk):
     return JsonResponse(
         {
             'id': image.id,
-            'key': image.key,
+            'name': image.name,
             'delete_url': reverse('images:delete', kwargs={'pk': image.id})
         }
     )

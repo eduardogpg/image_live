@@ -44,7 +44,6 @@ def create_folder(bucket, directory_name):
 
 def rename_file(bucket, new_mediafile_key, old_mediafile_key):
     try:
-        
         s3 = boto3.resource('s3')
         
         s3.Object(bucket, new_mediafile_key).copy_from(CopySource=old_mediafile_key)
