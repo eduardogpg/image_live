@@ -1,80 +1,214 @@
 {% extends 'base/base.html' %}
 
-{% block content %}
+{% block style %}
 <style>
-    z { cursor: pointer; }    
+    .image-key {
+        cursor: pointer;
+    }
 </style>
+{% endblock %}
 
-<div class="col">
-    <div class="row">
-        <div class="col">
-            <h3> {{ object.title }}</h3>
+{% block content %}
+
+{% include 'images/snippets/modals/form.html' %}
+{% include 'images/snippets/modals/delete.html' %}
+
+<div class="row mt-2">
+    <div class="col">
+        <h4>
+            <a href="{% url 'albums:list' %}"> {{ object.title }} </a>
+        </h4>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-9">
+        <hr>
+        <button class="btn btn-primary" data-toggle="modal" data-target="#createModal">Nueva imagen</button>
+        <div class="row mt-2">
+            <div class="col">
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Fecha creación</th>
+                        <th scope="col"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for image in images %}
+                            <tr id="{{ image.id }}">
+                                <th scope="row">
+                                    <input type="checkbox" class="form-check-input" id="chek-{{ image.id }}" image-id='{{ image.id }}'>
+                                </th>
+                                <td>
+                                    <input type="hidden" value="{{ image.url }}" id="preview-{{ image.id }}">
+                                    <div class="image-key" id='name-{{ image.id }}' image-id='{{ image.id }}' >
+                                        {{ image.name }}
+                                    </div>
+                                    <form action="{% url 'images:update' image.id %}" method="POST">{% csrf_token %}<input type="hidden" value="{{ image.title }}" name='name' id="input-{{ image.id }}"></form>
+                                </td>
+                                <td> {{ image.created_at | date }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" >
+                                          ...
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="{% url 'images:detail' image.pk %}">Vista previa</a>
+                                          <a class="dropdown-item download" href="{% url 'images:download' image.pk %}">Descargar</a>
+                                          <a class="dropdown-item change-name" href="#" image-id="{{ image.id }}" >Cambiar nombre</a>
+                                          <div class="dropdown-divider"></div>
+                                          <a class="dropdown-item" href="{% url 'images:show' image.id %}" image-id='{{ image.id }}' data-toggle="modal" data-target="#deleteModal">Eliminar</a>
+                                        </div>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-6">
+    <div class="col-2 text-center">
+        {% if image %}
+            <img width="300" height="300" id="preview" src="{{ image.url }}" class="img-responsive" style="padding-top: 5px">
+        {% endif %}
 
-            <table class="table">
-                <thead class="thead-dark">
-                    <tr>
-                        <th scope="col"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for image in images %}
-                        <tr>
-                            <td>
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="{{ image.key }}">
-                                    <label class="custom-control-label" for="{{ image.key }}"></label>
-                                    <input type="hidden" value="{{  image.url }}" id="url-image-{{ image.id }}">
-                                    
-                                    <z class="image-selected" id="image-{{ image.id }}">
-                                        {{ image.name }}
-                                    </z>
-                                    
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-        </div>
-        <div class="col-6">
-            <img src="{{ image.url }}" alt="" id="image-preview" width="550" height="350px">
-
-            <div class="row">
-                <div class="col text-center">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><a href="">Preview</a></li>
-                        <li class="list-group-item"><a href="">Eliminar</a></li>
-                        <li class="list-group-item"><a href="">Descargar</a></li>
-                      </ul>
-                </div>
+        <div class="row">
+            <div class="col text-center">
+                <ul>
+                    <li>
+                        <a href="{% url 'images:delete_many' %}" class="btn disabled" id="delete">Eliminar</a>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
 
 </div>
+
 {% endblock %}
 
 {% block javascript %}
 <script>
 
-    const imagePreview = document.getElementById('image-preview')
-
-    var images = document.getElementsByClassName("image-selected");
+$( document ).ready(function() {
     
-    for (var i = 0; i < images.length; i++) {
-        images[i].addEventListener('click', function(event){
-            var urlInput = document.getElementById('url-' + this.id);
+    const preview = document.getElementById('preview');
+    const deleteLink = document.getElementById('delete');
 
-            imagePreview.src = urlInput.value;
+    deleteLink.addEventListener("click", function(event){
+        event.preventDefault()
+
+        var ids = []
+        var images = document.querySelectorAll('input[type="checkbox"]:checked')
+        
+        for (var i = 0; i < images.length; i+=1) {
+            ids.push(images[i].getAttribute('image-id'))
+        }
+
+        fetch(this.href, {
+            method: 'POST',
+            body: JSON.stringify({
+                'ids': ids
+            })
+        })
+        .then(response => response.json())
+        .then(function(data){
+            
+            for (var i = 0; i < data.images_deleted.length; i+=1) {
+                var id = data.images_deleted[i]
+                var image = document.getElementById(id).remove();
+            } 
+            
+        });
+
+    });
+   
+    $('#deleteModal').on('show.bs.modal', function (event) {
+        
+        var button = $(event.relatedTarget)
+        var image = button[0];
+        var modal = $(this)
+        imageId = image.getAttribute('image-id');
+
+        fetch(image.href)
+        .then(response => response.json())
+        .then(function(data){
+            
+            modal.find('#image-to-delete').text(data.name);
+            modal.find('.delete-image-button')[0].href = data.delete_url
 
         });
-    }   
+    
+    })
+
+    $('.change-name').click(function(event) {
+        imageId = this.getAttribute('image-Id');
+        
+        div = document.getElementById('name-' + imageId)
+        div.style.display = "none";
+
+        input = document.getElementById('input-' + imageId)
+        input.setAttribute("type", "text");
+        
+    });
+
+    $('.image-key').click(function(event) {
+        
+        imageId = this.getAttribute('image-Id');
+
+        imagePreview = document.getElementById('preview-' + imageId);
+        preview.src = imagePreview.value;
+    });
+
+    $('.form-check-input').click(function(event){
+
+        var count = document.querySelectorAll('input[type="checkbox"]:checked').length;
+        if (count >= 1){
+            
+            // downloadLink.classList.remove("disabled");
+            deleteLink.classList.remove("disabled");
+
+        } else {
+
+            console.log('Vamos aquí!!!!')
+
+            // downloadLink.classList.add('disabled');
+            deleteLink.classList.add('disabled');
+        }
+
+    });
+
+    $('.download').click(function(event) {
+        event.preventDefault();
+
+        fetch(this.href, {
+            method: 'GET',
+        })
+        .then(response => response.blob())
+        .then(blob => {
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+    
+            a.download =  blob.type;
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+
+        });
+    });
+
+});
 
 </script>
 {% endblock %}

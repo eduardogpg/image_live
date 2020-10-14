@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.urls import path, include
 
-from images.views import create
+from .views import index
 
 urlpatterns = [
-    path('', create, name='index'),
+    path('', index, name='index'),
     path('admin/', admin.site.urls),
 
     path('albums/', include('albums.urls')),
-    #path('images/', include('images.urls')),
+    path('images/', include('images.urls')),
 ]

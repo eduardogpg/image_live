@@ -1,23 +1,31 @@
 {% extends 'base/base.html' %}
 
 {% block content %}
-<div class="col">
 
-    <div class="row">
-        <div class="col">
-            <h2>Galería</h2>
-        </div>
+{% include 'albums/snippets/modal/form.html' %}
+
+<div class="row">
+    <div class="col-10">
+        <h2>Galerías</h2>
     </div>
 
+    <div class="col-2">
+        <button class="btn btn-primary" data-toggle="modal" data-target="#albumModalForm">Nuevo album</button>
+    </div>
+</div>
+
+{% if object_list %}
     <div class="row">
         <div class="col">
 
             <table class="table">
-                <thead class="thead-dark">
+                <thead class="thead">
                     <tr>
                     <th scope="col">Key</th>
                     <th scope="col">Bucket</th>
                     <th scope="col">Fecha de creación</th>
+                    <th scope="col">Items</th>
+                    <th scope="col">Size</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -29,13 +37,18 @@
                             </td>
                             <td> {{ album.bucket }} </td>
                             <td> {{ album.created_at | date:'d M Y' }}</td>
+                            <td> {{ album.images.count }}</td>
+                            <td>{{ album.size }} Kb</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
-
-</div>
+{% else %}
+    <div>
+        Aún no posee un album.
+    </div>
+{% endif %}
     
 {% endblock %}
