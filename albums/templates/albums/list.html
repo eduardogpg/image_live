@@ -6,7 +6,7 @@
 
 <div class="row">
     <div class="col-10">
-        <h2>Mis Galerias</h2>
+        <h2>Galerías</h2>
     </div>
 
     <div class="col-2">
@@ -38,9 +38,7 @@
                             <td> {{ album.bucket }} </td>
                             <td> {{ album.created_at | date:'d M Y' }}</td>
                             <td> {{ album.images.count }}</td>
-                            <td>
-                                0 Kb
-                            </td>
+                            <td>{{ album.size }} Kb</td>
                         </tr>
                     {% endfor %}
                 </tbody>

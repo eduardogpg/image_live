@@ -1,4 +1,7 @@
+from django.http import Http404
+from django.http import HttpResponse
 from django.http import JsonResponse
+from django.http import FileResponse
 
 from django.urls import reverse
 from django.conf import settings
@@ -18,6 +21,8 @@ from .models import Image
 from albums.models import Album
 
 from .forms import UploadFileForm
+
+from AWS import download_file
 
 class ImageDetailView(DetailView):
     model = Image
@@ -43,6 +48,14 @@ def show(request, pk):
 
 def delete(request, pk):
     image = get_object_or_404(Image, pk=pk)
+    album = image.album
+
+    if image.delete():
+        messages.success(request, 'Imagen eliminada exitosamente.')
+    else:
+        messages.error(request, 'No fue posible completar la operación')
+
+    return redirect('albums:detail', album.id)
 
 def create(request):
     
@@ -54,7 +67,6 @@ def create(request):
 
             image = Image.objects.create_by_aws(settings.BUCKET,
                                                 form.cleaned_data['file'],
-                                                form.cleaned_data['title'], 
                                                 album)
 
             if image:
@@ -64,3 +76,28 @@ def create(request):
     messages.success(request, 'No fue posible completar la operación.')
     
     return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+
+def update(request, pk):
+    image = get_object_or_404(Image, pk=pk)
+
+    if request.method == 'POST' and request.POST.get('name'):
+        
+        new_name = request.POST['name']
+        file_type = image.content_type.split('/')[-1]
+
+        new_name = f'{new_name}.{file_type}'
+
+        if image.update_name(new_name):
+            pass
+
+    return redirect('albums:detail', image.album.pk)
+
+def download(request, pk):
+    image = get_object_or_404(Image, pk=pk)
+
+    local_path = f'tmp/{image.name}'
+    
+    if download_file(image.bucket, image.key, local_path):
+        return FileResponse(open(local_path, 'rb'))
+
+    raise Http404

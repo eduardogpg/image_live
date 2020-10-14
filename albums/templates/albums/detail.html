@@ -15,7 +15,9 @@
 
 <div class="row mt-2">
     <div class="col">
-        <h4>Vista {{ object.title }}</h4>
+        <h4>
+            <a href="{% url 'albums:list' %}"> {{ object.title }} </a>
+        </h4>
     </div>
 </div>
 
@@ -38,26 +40,27 @@
                         {% for image in images %}
                             <tr>
                                 <th scope="row">
-                                    <input type="checkbox" class="form-check-input" id="image-{{ image.id }}">
+                                    <input type="checkbox" class="form-check-input" id="chek-{{ image.id }}">
                                 </th>
                                 <td>
-                                    <div class="image-key">
-                                        {{ image.key }}
+                                    <input type="hidden" value="{{ image.url }}" id="preview-{{ image.id }}">
+                                    <div class="image-key" id='name-{{ image.id }}'>
+                                        {{ image.name }}
                                     </div>
+                                    <form action="{% url 'images:update' image.id %}" method="POST">{% csrf_token %}<input type="hidden" value="{{ image.title }}" name='name' id="input-{{ image.id }}"></form>
                                 </td>
                                 <td> {{ image.created_at | date }}</td>
                                 <td>
-                                    
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" >
                                           ...
                                         </button>
                                         <div class="dropdown-menu">
                                             <a class="dropdown-item" href="{% url 'images:detail' image.pk %}">Vista previa</a>
-                                          <a class="dropdown-item" href="#">Descargar</a>
-                                          <a class="dropdown-item" href="#">Cambiar nombre</a>
+                                          <a class="dropdown-item download" href="{% url 'images:download' image.pk %}">Descargar</a>
+                                          <a class="dropdown-item change-name" href="#" image-id="{{ image.id }}" >Cambiar nombre</a>
                                           <div class="dropdown-divider"></div>
-                                          <a class="dropdown-item" href="{% url 'images:show' image.id %}" data-toggle="modal" id="{{ image.id }}" data-target="#deleteModal">Eliminar</a>
+                                          <a class="dropdown-item" href="{% url 'images:show' image.id %}" image-id='{{ image.id }}' data-toggle="modal" data-target="#deleteModal">Eliminar</a>
                                         </div>
                                     </div>
 
@@ -72,7 +75,9 @@
     </div>
 
     <div class="col-2 text-center">
-        <img width="300" height="300" src="https://livedjango.s3.us-east-2.amazonaws.com/prueba_live_django/perrito" class="img-responsive" style="padding-top: 5px">
+        {% if image %}
+            <img width="300" height="300" id="preview" src="{{ image.url }}" class="img-responsive" style="padding-top: 5px">
+        {% endif %}
     </div>
 
 </div>
@@ -84,26 +89,69 @@
 
 $( document ).ready(function() {
     
+    const preview = document.getElementById('preview')
+
     $('#deleteModal').on('show.bs.modal', function (event) {
         
         var button = $(event.relatedTarget)
         var image = button[0];
         var modal = $(this)
+        imageId = image.getAttribute('image-id');
 
         fetch(image.href)
         .then(response => response.json())
         .then(function(data){
             
             modal.find('#image-to-delete').text(data.key);
-            href =  modal.find('.delete-image-button')[0].href
-
-            console.log(
-                data.delete_url
-            );
+            modal.find('.delete-image-button')[0].href = data.delete_url
 
         });
     
     })
+
+    $('.change-name').click(function(event) {
+        imageId = this.getAttribute('image-Id');
+        
+        div = document.getElementById('name-' + imageId)
+        div.style.display = "none";
+
+        input = document.getElementById('input-' + imageId)
+        input.setAttribute("type", "text");
+        
+    });
+
+
+    $('.image-key').click(function(event) {
+        imageId = this.getAttribute('image-Id');
+        imagePreview = document.getElementById('preview-' + imageId);
+        preview.src = imagePreview.value;
+    });
+
+
+
+    $('.download').click(function(event) {
+        event.preventDefault();
+
+        fetch(this.href, {
+            method: 'GET',
+        })
+        .then(response => response.blob())
+        .then(blob => {
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+    
+            a.download =  blob.type;
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+
+        });
+    });
+
 });
 
 </script>
