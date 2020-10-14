@@ -38,9 +38,9 @@
                     </thead>
                     <tbody>
                         {% for image in images %}
-                            <tr>
+                            <tr id="{{ image.id }}">
                                 <th scope="row">
-                                    <input type="checkbox" class="form-check-input" id="chek-{{ image.id }}">
+                                    <input type="checkbox" class="form-check-input" id="chek-{{ image.id }}" image-id='{{ image.id }}'>
                                 </th>
                                 <td>
                                     <input type="hidden" value="{{ image.url }}" id="preview-{{ image.id }}">
@@ -83,10 +83,7 @@
             <div class="col text-center">
                 <ul>
                     <li>
-                        <a href="" class="btn disabled">Descargar</a>
-                    </li>
-                    <li>
-                        <a href="" class="btn disabled">Eliminar</a>
+                        <a href="{% url 'images:delete_many' %}" class="btn disabled" id="delete">Eliminar</a>
                     </li>
                 </ul>
             </div>
@@ -102,8 +99,37 @@
 
 $( document ).ready(function() {
     
-    const preview = document.getElementById('preview')
+    const preview = document.getElementById('preview');
+    const deleteLink = document.getElementById('delete');
 
+    deleteLink.addEventListener("click", function(event){
+        event.preventDefault()
+
+        var ids = []
+        var images = document.querySelectorAll('input[type="checkbox"]:checked')
+        
+        for (var i = 0; i < images.length; i+=1) {
+            ids.push(images[i].getAttribute('image-id'))
+        }
+
+        fetch(this.href, {
+            method: 'POST',
+            body: JSON.stringify({
+                'ids': ids
+            })
+        })
+        .then(response => response.json())
+        .then(function(data){
+            
+            for (var i = 0; i < data.images_deleted.length; i+=1) {
+                var id = data.images_deleted[i]
+                var image = document.getElementById(id).remove();
+            } 
+            
+        });
+
+    });
+   
     $('#deleteModal').on('show.bs.modal', function (event) {
         
         var button = $(event.relatedTarget)
@@ -139,6 +165,24 @@ $( document ).ready(function() {
 
         imagePreview = document.getElementById('preview-' + imageId);
         preview.src = imagePreview.value;
+    });
+
+    $('.form-check-input').click(function(event){
+
+        var count = document.querySelectorAll('input[type="checkbox"]:checked').length;
+        if (count >= 1){
+            
+            // downloadLink.classList.remove("disabled");
+            deleteLink.classList.remove("disabled");
+
+        } else {
+
+            console.log('Vamos aquí!!!!')
+
+            // downloadLink.classList.add('disabled');
+            deleteLink.classList.add('disabled');
+        }
+
     });
 
     $('.download').click(function(event) {

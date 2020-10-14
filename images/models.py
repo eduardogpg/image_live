@@ -26,6 +26,12 @@ class ImageManager(models.Manager):
                 content_type=file.content_type,
             )
 
+    def delete_by_id(self, id):
+        image = self.filter(id=id).first()
+        
+        if image: # and image.delete():
+            return id
+
 class Image(models.Model):
     key = models.CharField(max_length=50, null=False, blank=False)
     bucket = models.CharField(max_length=50, null=False, blank=False)

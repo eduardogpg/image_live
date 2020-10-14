@@ -101,3 +101,18 @@ def download(request, pk):
         return FileResponse(open(local_path, 'rb'))
 
     raise Http404
+
+@csrf_exempt
+def delete_many(request):
+    import json
+
+    if request.method == 'POST':
+        payload = json.loads(request.body)
+        images_deleted = [Image.objects.delete_by_id(id) for id in payload.get('ids', []) ]
+
+    return JsonResponse(
+        { 
+            'success': True, 
+            'images_deleted': images_deleted,
+        }
+    )
