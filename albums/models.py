@@ -43,5 +43,9 @@ class Album(models.Model):
         return self.image_set.all()
 
     @property
+    def name(self):
+        return self.key.replace('/', '')
+
+    @property
     def size(self):
         return self.images.aggregate(Sum('size'))['size__sum']

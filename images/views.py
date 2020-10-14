@@ -1,3 +1,8 @@
+import json
+import shutil
+
+from pathlib import Path
+
 from django.http import Http404
 from django.http import HttpResponse
 from django.http import JsonResponse
@@ -104,8 +109,6 @@ def download(request, pk):
 
 @csrf_exempt
 def delete_many(request):
-    import json
-
     if request.method == 'POST':
         payload = json.loads(request.body)
         images_deleted = [Image.objects.delete_by_id(id) for id in payload.get('ids', []) ]
@@ -116,3 +119,29 @@ def delete_many(request):
             'images_deleted': images_deleted,
         }
     )
+
+@csrf_exempt
+def download_many(request):
+    album = Album.objects.first() # Cambiar por el usuario
+    
+    zip_path = f'tmp/zip/{album.name}'
+    download_path = f'tmp/images/{album.key}'
+    
+    Path(zip_path).mkdir(parents=True, exist_ok=True)
+    Path(download_path).mkdir(parents=True, exist_ok=True)
+
+    if request.method == 'POST':
+        payload = json.loads(request.body)
+
+        for id in payload.get('ids', []):
+            image = Image.objects.filter(id=id).first()
+
+            if image:
+                image_path = f'{download_path}{image.name}'
+                download_file(image.bucket, image.key, image_path)
+        
+        shutil.make_archive(zip_path, 'zip', download_path)
+
+        return FileResponse(open(zip_path + '.zip', 'rb'))
+
+    return JsonResponse( {  'success': False } )

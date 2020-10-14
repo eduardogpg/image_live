@@ -8,6 +8,7 @@ from .views import download
 from .views import ImageDetailView
 
 from .views import delete_many
+from .views import download_many
 
 app_name = 'images'
 
@@ -20,5 +21,6 @@ urlpatterns = [
     path('download/<int:pk>', download, name='download'),
 
     path('delete/many', delete_many, name='delete_many'),
+    path('download/many', download_many, name='download_many'),
 
 ]

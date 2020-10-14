@@ -30,7 +30,9 @@
                 <table class="table">
                     <thead>
                       <tr>
-                        <th scope="col"></th>
+                        <th scope="col">
+                            
+                        </th>
                         <th scope="col">Nombre</th>
                         <th scope="col">Fecha creación</th>
                         <th scope="col"></th>
@@ -73,22 +75,30 @@
             </div>
         </div>
     </div>
-
+    
+    {% if image %}
     <div class="col-2 text-center">
-        {% if image %}
-            <img width="300" height="300" id="preview" src="{{ image.url }}" class="img-responsive" style="padding-top: 5px">
-        {% endif %}
-
         <div class="row">
-            <div class="col text-center">
-                <ul>
-                    <li>
+            <div class="col">
+                <img width="300" height="300" id="preview" src="{{ image.url }}" class="img-responsive" style="padding-top: 5px">
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-6"></div>
+            <div class="col-6">
+                <ul class="">
+                    <li class="">
                         <a href="{% url 'images:delete_many' %}" class="btn disabled" id="delete">Eliminar</a>
+                    </li>
+                    <li class="">
+                        <a href="{% url 'images:download_many' %}" class="btn disabled" id="download">Descargar</a>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
+    {% endif %}
 
 </div>
 
@@ -101,6 +111,7 @@ $( document ).ready(function() {
     
     const preview = document.getElementById('preview');
     const deleteLink = document.getElementById('delete');
+    const downloadLink = document.getElementById('download');
 
     deleteLink.addEventListener("click", function(event){
         event.preventDefault()
@@ -126,6 +137,40 @@ $( document ).ready(function() {
                 var image = document.getElementById(id).remove();
             } 
             
+        });
+
+    });
+
+    downloadLink.addEventListener('click', function(event){
+        event.preventDefault()
+        
+        var ids = []
+        var images = document.querySelectorAll('input[type="checkbox"]:checked')
+        
+        for (var i = 0; i < images.length; i+=1) {
+            ids.push(images[i].getAttribute('image-id'))
+        }
+
+        fetch(this.href, {
+            method: 'POST',
+            body: JSON.stringify({
+                'ids': ids
+            })
+        })
+        .then(response => response.blob())
+        .then(blob => {
+            
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+    
+            a.download =  blob.type;
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+
         });
 
     });
@@ -172,14 +217,12 @@ $( document ).ready(function() {
         var count = document.querySelectorAll('input[type="checkbox"]:checked').length;
         if (count >= 1){
             
-            // downloadLink.classList.remove("disabled");
+            downloadLink.classList.remove("disabled");
             deleteLink.classList.remove("disabled");
 
         } else {
 
-            console.log('Vamos aquí!!!!')
-
-            // downloadLink.classList.add('disabled');
+            downloadLink.classList.add('disabled');
             deleteLink.classList.add('disabled');
         }
 
