@@ -48,4 +48,7 @@ class Album(models.Model):
 
     @property
     def size(self):
-        return self.images.aggregate(Sum('size'))['size__sum']
+        if self.images:
+            return self.images.aggregate(Sum('size'))['size__sum']
+        else:
+            return 0

@@ -46,8 +46,10 @@ def rename_file(bucket, new_mediafile_key, old_mediafile_key):
     try:
         s3 = boto3.resource('s3')
         
-        s3.Object(bucket, new_mediafile_key).copy_from(CopySource=old_mediafile_key)
+        s3.Object(bucket, new_mediafile_key).copy_from(CopySource=bucket +  '/' + old_mediafile_key)
         s3.Object(bucket, old_mediafile_key).delete()
+        
+        s3.Object(bucket, new_mediafile_key).Acl().put(ACL='public-read')
 
         return True
         

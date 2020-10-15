@@ -85,15 +85,12 @@ def create(request):
 def update(request, pk):
     image = get_object_or_404(Image, pk=pk)
 
-    if request.method == 'POST' and request.POST.get('name'):
+    if request.method == 'POST':
         
-        new_name = request.POST['name']
-        file_type = image.content_type.split('/')[-1]
+        new_name = request.POST.get('name', '')
+        new_name = f'{new_name}.{image.extension}'
 
-        new_name = f'{new_name}.{file_type}'
-
-        if image.update_name(new_name):
-            pass
+        image.update_name(new_name)
 
     return redirect('albums:detail', image.album.pk)
 

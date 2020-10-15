@@ -29,7 +29,7 @@ class ImageManager(models.Manager):
     def delete_by_id(self, id):
         image = self.filter(id=id).first()
         
-        if image: # and image.delete():
+        if image and image.delete():
             return id
 
 class Image(models.Model):
@@ -62,15 +62,19 @@ class Image(models.Model):
     def title(self):
         return self.name.split('.')[0]
 
+    @property
+    def extension(self):
+        return self.content_type.split('/')[-1]
+
     def update_name(self, new_name):
         new_image_key = Image.generate_key(new_name, self.album)
         
-        #if rename_file(self.bucket, new_image_key, self.key):
-        
-        self.name = new_name# key = new_image_key
-        self.save()
+        if rename_file(self.bucket, new_image_key, self.key):
+            self.name = new_name
+            self.key = new_image_key
+            self.save()
 
-        return self.key
+            return self.key
 
 def delete_mediafile_object(sender, instance, using, *args, **kwargs):
     if delete_mediafile(instance.bucket, instance.key) is None:
