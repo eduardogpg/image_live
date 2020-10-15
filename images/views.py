@@ -82,17 +82,22 @@ def create(request):
     
     return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
+@csrf_exempt
 def update(request, pk):
     image = get_object_or_404(Image, pk=pk)
 
     if request.method == 'POST':
-        
         new_name = request.POST.get('name', '')
         new_name = f'{new_name}.{image.extension}'
 
         image.update_name(new_name)
 
-    return redirect('albums:detail', image.album.pk)
+    return JsonResponse(
+        {
+            'id': image.id,
+            'name': image.title
+        }
+    )
 
 def download(request, pk):
     image = get_object_or_404(Image, pk=pk)
@@ -138,7 +143,6 @@ def download_many(request):
                 download_file(image.bucket, image.key, image_path)
         
         shutil.make_archive(zip_path, 'zip', download_path)
-
         return FileResponse(open(zip_path + '.zip', 'rb'))
 
     return JsonResponse( {  'success': False } )

@@ -44,10 +44,10 @@
                                 </th>
                                 <td>
                                     <input type="hidden" value="{{ image.url }}" id="preview-{{ image.id }}">
-                                    <div class="image-key" id='name-{{ image.id }}' image-id='{{ image.id }}' >
+                                    <div class="image-key" id='image-name-{{ image.id }}' image-id='{{ image.id }}' >
                                         {{ image.title }}
                                     </div>
-                                    <form action="{% url 'images:update' image.id %}" method="POST">{% csrf_token %}<input type="hidden" value="{{ image.title }}" name='name' id="input-{{ image.id }}"></form>
+                                    <form action="{% url 'images:update' image.id %}" method="POST" class="image-form" image-id='{{ image.id }}'>{% csrf_token %}<input type="hidden" value="{{ image.title }}" name='name' id="input-name-{{ image.id }}"></form>
                                 </td>
                                 <td> {{ image.created_at | date }}</td>
                                 <td>
@@ -196,10 +196,10 @@ $( document ).ready(function() {
     $('.change-name').click(function(event) {
         imageId = this.getAttribute('image-Id');
         
-        div = document.getElementById('name-' + imageId)
+        div = document.getElementById('image-name-' + imageId)
         div.style.display = "none";
 
-        input = document.getElementById('input-' + imageId)
+        input = document.getElementById('input-name-' + imageId)
         input.setAttribute("type", "text");
         
     });
@@ -251,6 +251,31 @@ $( document ).ready(function() {
         });
     });
 
+    $('.image-form').submit(function(event){
+        event.preventDefault()
+
+        fetch(this.action, {
+            body: new FormData(this),
+            method: "POST"
+        })
+        .then(response => response.json())
+        .then(data => {
+            
+            console.log(data)
+
+            imageId = this.getAttribute('image-id');
+            
+            input = document.getElementById('input-name-' + imageId);
+            div = document.getElementById('image-name-' + imageId)
+            
+            input.setAttribute('type', 'hidden')
+            input.value = data.name;
+
+            div.innerHTML = data.name;
+            div.style.display = 'block';
+        });
+
+    });
 });
 
 </script>
