@@ -13,91 +13,88 @@
 {% include 'images/snippets/modals/form.html' %}
 {% include 'images/snippets/modals/delete.html' %}
 
-<div class="row mt-2">
+<div class="row">
     <div class="col">
-        <h4>{{ object.title }}</h4>
+        <h2>{{ object.title }}</h2>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-9">
-        <hr>
-        <button class="btn btn-primary" data-toggle="modal" data-target="#createModal">Nueva imagen</button>
-        <div class="row mt-2">
-            <div class="col">
-                <table class="table">
-                    <thead>
-                      <tr>
-                        <th scope="col">
-                            
-                        </th>
-                        <th scope="col">Nombre</th>
-                        <th scope="col">Fecha creación</th>
-                        <th scope="col"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        {% for image in images %}
-                            <tr id="{{ image.id }}">
-                                <th scope="row">
-                                    <input type="checkbox" class="form-check-input" id="chek-{{ image.id }}" image-id='{{ image.id }}'>
-                                </th>
-                                <td>
-                                    <input type="hidden" value="{{ image.url }}" id="preview-{{ image.id }}">
-                                    <div class="image-key" id='image-name-{{ image.id }}' image-id='{{ image.id }}' >
-                                        {{ image.title }}
-                                    </div>
-                                    <form action="{% url 'images:update' image.id %}" method="POST" class="image-form" image-id='{{ image.id }}'>{% csrf_token %}<input type="hidden" value="{{ image.title }}" name='name' id="input-name-{{ image.id }}"></form>
-                                </td>
-                                <td> {{ image.created_at | date }}</td>
-                                <td>
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" >
-                                          ...
-                                        </button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ image.url }}" target="_blank">Vista previa</a>
-                                          <a class="dropdown-item download" href="{% url 'images:download' image.pk %}">Descargar</a>
-                                          <a class="dropdown-item change-name" href="#" image-id="{{ image.id }}" >Cambiar nombre</a>
-                                          <div class="dropdown-divider"></div>
-                                          <a class="dropdown-item" href="{% url 'images:show' image.id %}" image-id='{{ image.id }}' data-toggle="modal" data-target="#deleteModal">Eliminar</a>
-                                        </div>
-                                    </div>
-
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
+    <div class="col">
+        <form action="">
+            <div class="form-group">
+                <input type="text" class="form-control" name='q' placeholder="Escriba un prefijo">
             </div>
-        </div>
+        </form>
     </div>
-    
-    {% if image %}
-    <div class="col-2 text-center">
-        <div class="row">
-            <div class="col">
-                <img width="300" height="300" id="preview" src="{{ image.url }}" class="img-responsive" style="padding-top: 5px">
-            </div>
+</div>
+
+
+<div class="row">
+    <div class="col mt-2">
+
+        <div class="options">
+            <button class="btn btn-primary" data-toggle="modal" data-target="#createModal">Nueva imagen</button>
+
+            <a type="button" href="{% url 'images:download_many' %}" class="btn btn-info disabled" id="download">Descargar</a>
+            <a type="button" href="{% url 'images:delete_many' %}" class="btn btn-danger disabled" id="delete">Eliminar</a>
         </div>
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-8 mt-4">
         
-        <div class="row">
-            <div class="col-6"></div>
-            <div class="col-6">
-                <ul class="">
-                    <li class="">
-                        <a href="{% url 'images:delete_many' %}" class="btn disabled" id="delete">Eliminar</a>
-                    </li>
-                    <li class="">
-                        <a href="{% url 'images:download_many' %}" class="btn disabled" id="download">Descargar</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    {% endif %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th>Nombre</th>
+                    <th>Última modificación</th>
+                    <th>Tamaño </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for image in images %}
+                    <tr>
+                        <th>
+                            <input type="checkbox" class="form-check-input" id="chek-{{ image.id }}" image-id='{{ image.id }}'>
+                        </th>
+                        <td>
+                            <input type="hidden" value="{{ image.url }}" id="preview-{{ image.id }}">
+                            <div class="image-key" id='image-name-{{ image.id }}' image-id='{{ image.id }}' >
+                                {{ image.title }}
+                            </div>
+                            <form action="{% url 'images:update' image.id %}" method="POST" class="image-form" image-id='{{ image.id }}'>{% csrf_token %}<input type="hidden" value="{{ image.title }}" name='name' id="input-name-{{ image.id }}"></form>
+                        </td>
+                        <td>{{ image.created_at | date }}</td>
+                        <td>{{ image.size }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" >
+                                  ...
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="{{ image.url }}" target="_blank">Vista previa</a>
+                                  <a class="dropdown-item download" href="{% url 'images:download' image.pk %}">Descargar</a>
+                                  <a class="dropdown-item change-name" href="#" image-id="{{ image.id }}" >Cambiar nombre</a>
+                                  <div class="dropdown-divider"></div>
+                                  <a class="dropdown-item" href="{% url 'images:show' image.id %}" image-id='{{ image.id }}' data-toggle="modal" data-target="#deleteModal">Eliminar</a>
+                                </div>
+                            </div>
 
+                        </td>
+                    </tr>
+                {% endfor%}
+            </tbody>
+        </table>
+
+    </div>
+    <div class="col">
+        <img width="300" height="300" id="preview" src="{{ image.url }}" class="img-responsive" style="padding-top: 5px">
+    </div>
 </div>
 
 {% endblock %}
@@ -273,6 +270,10 @@ $( document ).ready(function() {
 
             div.innerHTML = data.name;
             div.style.display = 'block';
+
+            input = document.getElementById('preview-' + imageId)
+            input.value = data.url
+            
         });
 
     });

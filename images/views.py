@@ -95,7 +95,8 @@ def update(request, pk):
     return JsonResponse(
         {
             'id': image.id,
-            'name': image.title
+            'name': image.title,
+            'url': image.url
         }
     )
 
