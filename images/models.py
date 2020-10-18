@@ -76,6 +76,11 @@ class Image(models.Model):
 
             return self.key
 
+    @property
+    def lenght(self):
+        from hurry.filesize import size
+        return size(self.size)
+
 def delete_mediafile_object(sender, instance, using, *args, **kwargs):
     if delete_mediafile(instance.bucket, instance.key) is None:
         raise Exception('Do not delete')

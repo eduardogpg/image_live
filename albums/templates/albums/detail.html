@@ -2,7 +2,7 @@
 
 {% block style %}
 <style>
-    .image-key {
+    .image-row {
         cursor: pointer;
     }
 </style>
@@ -29,15 +29,14 @@
     </div>
 </div>
 
-
 <div class="row">
     <div class="col mt-2">
 
         <div class="options">
             <button class="btn btn-primary" data-toggle="modal" data-target="#createModal">Nueva imagen</button>
 
-            <a type="button" href="{% url 'images:download_many' %}" class="btn btn-info disabled" id="download">Descargar</a>
-            <a type="button" href="{% url 'images:delete_many' %}" class="btn btn-danger disabled" id="delete">Eliminar</a>
+            <a type="button" href="{% url 'images:download_many' %}" class="btn btn-info disabled" id="download-images">Descargar</a>
+            <a type="button" href="{% url 'images:delete_many' %}" class="btn btn-danger disabled" id="delete-images">Eliminar</a>
         </div>
 
     </div>
@@ -49,7 +48,12 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th scope="col"></th>
+                    <td scope="col">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="check-all">
+                        </div>
+                    </td>
+
                     <th>Nombre</th>
                     <th>Última modificación</th>
                     <th>Tamaño </th>
@@ -58,19 +62,24 @@
             </thead>
             <tbody>
                 {% for image in images %}
-                    <tr>
-                        <th>
-                            <input type="checkbox" class="form-check-input" id="chek-{{ image.id }}" image-id='{{ image.id }}'>
-                        </th>
+                    <tr id="image-{{ image.id }}" class="image-row" image-id="{{ image.id }}">
                         <td>
-                            <input type="hidden" value="{{ image.url }}" id="preview-{{ image.id }}">
-                            <div class="image-key" id='image-name-{{ image.id }}' image-id='{{ image.id }}' >
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input image-checkbox">
+                            </div>
+                        </td>
+                        <td>
+                            <input type="hidden" value="{{ image.url }}" id="image-preview-{{ image.id }}">
+                            <div class="image-name" image-id='{{ image.id }}' id="image-name-{{ image.id }}">
                                 {{ image.title }}
                             </div>
-                            <form action="{% url 'images:update' image.id %}" method="POST" class="image-form" image-id='{{ image.id }}'>{% csrf_token %}<input type="hidden" value="{{ image.title }}" name='name' id="input-name-{{ image.id }}"></form>
+                            <form action="{% url 'images:update' image.id %}" method="POST" class="image-form" image-id='{{ image.id }}'>
+                                {% csrf_token %}
+                                <input type="hidden" class="form-control" value="{{ image.title }}" name='name' id="image-input-name-{{ image.id }}">
+                            </form>
                         </td>
                         <td>{{ image.created_at | date }}</td>
-                        <td>{{ image.size }}</td>
+                        <td>{{ image.lenght }}</td>
                         <td>
                             <div class="btn-group">
                                 <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" >
@@ -78,8 +87,8 @@
                                 </button>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" href="{{ image.url }}" target="_blank">Vista previa</a>
-                                  <a class="dropdown-item download" href="{% url 'images:download' image.pk %}">Descargar</a>
-                                  <a class="dropdown-item change-name" href="#" image-id="{{ image.id }}" >Cambiar nombre</a>
+                                  <a class="dropdown-item image-download" href="{% url 'images:download' image.pk %}">Descargar</a>
+                                  <a class="dropdown-item image-edit" href="#" image-id="{{ image.id }}" >Cambiar nombre</a>
                                   <div class="dropdown-divider"></div>
                                   <a class="dropdown-item" href="{% url 'images:show' image.id %}" image-id='{{ image.id }}' data-toggle="modal" data-target="#deleteModal">Eliminar</a>
                                 </div>
@@ -93,7 +102,7 @@
 
     </div>
     <div class="col">
-        <img width="300" height="300" id="preview" src="{{ image.url }}" class="img-responsive" style="padding-top: 5px">
+        <img width="300" height="300" id="image-preview" src="{{ image.url }}" class="img-responsive" style="padding-top: 5px">
     </div>
 </div>
 
@@ -101,82 +110,133 @@
 
 {% block javascript %}
 <script>
+    const preview = document.getElementById('image-preview')
 
-$( document ).ready(function() {
-    
-    const preview = document.getElementById('preview');
-    const deleteLink = document.getElementById('delete');
-    const downloadLink = document.getElementById('download');
+    const checkAll = document.getElementById('check-all');
+    const downloadImages = document.getElementById('download-images')
+    const deleteImages = document.getElementById('delete-images');
 
-    deleteLink.addEventListener("click", function(event){
-        event.preventDefault()
+    function checkInputs(){
+        if (document.querySelectorAll('input[type="checkbox"]:checked').length >= 2){
+            
+            downloadImages.classList.remove("disabled");
+            deleteImages.classList.remove("disabled");
 
-        var ids = []
-        var images = document.querySelectorAll('input[type="checkbox"]:checked')
-        
-        for (var i = 0; i < images.length; i+=1) {
-            ids.push(images[i].getAttribute('image-id'))
+        } else {
+
+            downloadImages.classList.add('disabled');
+            deleteImages.classList.add('disabled');
         }
+    }
 
-        fetch(this.href, {
-            method: 'POST',
-            body: JSON.stringify({
-                'ids': ids
-            })
+    checkAll.addEventListener('change', function(event){
+        document.querySelectorAll(".image-checkbox").forEach(element => {
+            element.checked = this.checked;
         })
-        .then(response => response.json())
-        .then(function(data){
-            
-            for (var i = 0; i < data.images_deleted.length; i+=1) {
-                var id = data.images_deleted[i]
-                var image = document.getElementById(id).remove();
-            } 
-            
-        });
-
+        checkInputs();
     });
 
-    downloadLink.addEventListener('click', function(event){
-        event.preventDefault()
-        
-        var ids = []
-        var images = document.querySelectorAll('input[type="checkbox"]:checked')
-        
-        for (var i = 0; i < images.length; i+=1) {
-            ids.push(images[i].getAttribute('image-id'))
-        }
-
-        fetch(this.href, {
-            method: 'POST',
-            body: JSON.stringify({
-                'ids': ids
-            })
-        })
-        .then(response => response.blob())
-        .then(blob => {
-            
-            console.log(blob)
-
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-    
-            a.download =  blob.name;
-            document.body.appendChild(a);
-            a.click();
-
-            window.URL.revokeObjectURL(url);
-
+    document.querySelectorAll('.image-checkbox').forEach(element => {
+        element.addEventListener('click', function(event){
+            checkInputs()
         });
-
     });
-   
+    
+    document.querySelectorAll('.image-row').forEach(element => {
+        
+        element.addEventListener('click', function(event){
+            var imageId = this.getAttribute('image-id');
+            var imagePreview = document.getElementById('image-preview-' + imageId);
+        
+            preview.src = imagePreview.value;
+
+            document.querySelectorAll('.table-active').forEach(element => {
+                element.classList.remove('table-active');
+            });
+
+            var tr = document.getElementById('image-' + imageId)
+            tr.classList.add('table-active')
+        })
+    });
+
+    document.querySelectorAll('.image-download').forEach(element => {
+        
+        element.addEventListener('click', function(event){
+            
+            event.preventDefault();
+
+            fetch(this.href, {
+                method: 'GET',
+            })
+            .then(response => response.blob())
+            .then(blob => {
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+        
+                a.download = 'image'; // blob.type;
+                document.body.appendChild(a);
+                a.click();
+
+                window.URL.revokeObjectURL(url);
+
+            });
+            
+        })
+    });
+
+    document.querySelectorAll('.image-edit').forEach(element => {
+        
+        element.addEventListener('click', function(event){
+            
+            imageId = this.getAttribute('image-Id');
+        
+            div = document.getElementById('image-name-' + imageId)
+            div.style.display = "none";
+
+            input = document.getElementById('image-input-name-' + imageId)
+            input.setAttribute("type", "text");
+
+        })
+    });
+
+    document.querySelectorAll('.image-form').forEach(element => {
+        element.addEventListener('submit', function(event){
+            event.preventDefault();
+
+            fetch(this.action, {
+            body: new FormData(this),
+            method: "POST"
+            })
+            .then(response => response.json())
+            .then(data => {
+                
+                imageId = this.getAttribute('image-id');
+                
+                input = document.getElementById('image-input-name-' + imageId);
+                div = document.getElementById('image-name-' + imageId)
+                
+                input.setAttribute('type', 'hidden')
+                input.value = data.name;
+
+                div.innerHTML = data.name;
+                div.style.display = 'block';
+
+                input = document.getElementById('image-preview-' + imageId)
+                input.value = data.url
+                
+            });
+        })
+    });
+
     $('#deleteModal').on('show.bs.modal', function (event) {
         
         var button = $(event.relatedTarget)
         var image = button[0];
         var modal = $(this)
+
         imageId = image.getAttribute('image-id');
 
         fetch(image.href)
@@ -189,95 +249,6 @@ $( document ).ready(function() {
         });
     
     })
-
-    $('.change-name').click(function(event) {
-        imageId = this.getAttribute('image-Id');
-        
-        div = document.getElementById('image-name-' + imageId)
-        div.style.display = "none";
-
-        input = document.getElementById('input-name-' + imageId)
-        input.setAttribute("type", "text");
-        
-    });
-
-    $('.image-key').click(function(event) {
-        
-        imageId = this.getAttribute('image-Id');
-
-        imagePreview = document.getElementById('preview-' + imageId);
-        preview.src = imagePreview.value;
-    });
-
-    $('.form-check-input').click(function(event){
-
-        var count = document.querySelectorAll('input[type="checkbox"]:checked').length;
-        if (count >= 1){
-            
-            downloadLink.classList.remove("disabled");
-            deleteLink.classList.remove("disabled");
-
-        } else {
-
-            downloadLink.classList.add('disabled');
-            deleteLink.classList.add('disabled');
-        }
-
-    });
-
-    $('.download').click(function(event) {
-        event.preventDefault();
-
-        fetch(this.href, {
-            method: 'GET',
-        })
-        .then(response => response.blob())
-        .then(blob => {
-
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-    
-            a.download = 'image'; // blob.type;
-            document.body.appendChild(a);
-            a.click();
-
-            window.URL.revokeObjectURL(url);
-
-        });
-    });
-
-    $('.image-form').submit(function(event){
-        event.preventDefault()
-
-        fetch(this.action, {
-            body: new FormData(this),
-            method: "POST"
-        })
-        .then(response => response.json())
-        .then(data => {
-            
-            console.log(data)
-
-            imageId = this.getAttribute('image-id');
-            
-            input = document.getElementById('input-name-' + imageId);
-            div = document.getElementById('image-name-' + imageId)
-            
-            input.setAttribute('type', 'hidden')
-            input.value = data.name;
-
-            div.innerHTML = data.name;
-            div.style.display = 'block';
-
-            input = document.getElementById('preview-' + imageId)
-            input.value = data.url
-            
-        });
-
-    });
-});
 
 </script>
 {% endblock %}
