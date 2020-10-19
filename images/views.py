@@ -22,6 +22,8 @@ from django.http import HttpResponseRedirect
 from django.views.generic.detail import DetailView
 from django.views.decorators.csrf import csrf_exempt
 
+from django.template.loader import get_template
+
 from .models import Image
 from albums.models import Album
 
@@ -149,3 +151,20 @@ def download_many(request):
         return FileResponse(open(zip_path + '.zip', 'rb'))
 
     return JsonResponse( {  'success': False } )
+
+@csrf_exempt
+def search(request):
+    if request.method == 'GET' and request.GET.get('q'):
+        images = Image.objects.filter(name__startswith=request.GET['q'])
+        
+        template = get_template('images/snippets/image.html')
+        images = [template.render({'image': image}) for image in images]
+
+        return JsonResponse(
+            {
+                'success':True,
+                'images': images
+            }
+        )
+    
+    return JsonResponse({'success': False})

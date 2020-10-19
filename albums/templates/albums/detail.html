@@ -21,7 +21,7 @@
 
 <div class="row">
     <div class="col">
-        <form action="">
+        <form action="{% url 'images:search' %}" id="image-search">
             <div class="form-group">
                 <input type="text" class="form-control" name='q' placeholder="Escriba un prefijo">
             </div>
@@ -60,43 +60,10 @@
                     <th></th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="images">
                 {% for image in images %}
-                    <tr id="image-{{ image.id }}" class="image-row" image-id="{{ image.id }}">
-                        <td>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input image-checkbox" image-id='{{ image.id }}'>
-                            </div>
-                        </td>
-                        <td>
-                            <input type="hidden" value="{{ image.url }}" id="image-preview-{{ image.id }}">
-                            <div class="image-name" image-id='{{ image.id }}' id="image-name-{{ image.id }}">
-                                {{ image.title }}
-                            </div>
-                            <form action="{% url 'images:update' image.id %}" method="POST" class="image-form" image-id='{{ image.id }}'>
-                                {% csrf_token %}
-                                <input type="hidden" class="form-control" value="{{ image.title }}" name='name' id="image-input-name-{{ image.id }}">
-                            </form>
-                        </td>
-                        <td>{{ image.created_at | date }}</td>
-                        <td>{{ image.lenght }}</td>
-                        <td>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" >
-                                  ...
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="{{ image.url }}" target="_blank">Vista previa</a>
-                                  <a class="dropdown-item image-download" href="{% url 'images:download' image.pk %}">Descargar</a>
-                                  <a class="dropdown-item image-edit" href="#" image-id="{{ image.id }}" >Cambiar nombre</a>
-                                  <div class="dropdown-divider"></div>
-                                  <a class="dropdown-item" href="{% url 'images:show' image.id %}" image-id='{{ image.id }}' data-toggle="modal" data-target="#deleteModal">Eliminar</a>
-                                </div>
-                            </div>
-
-                        </td>
-                    </tr>
-                {% endfor%}
+                    {% include 'images/snippets/image.html' with image=image %}
+                {% endfor %}
             </tbody>
         </table>
 
@@ -115,8 +82,26 @@
     const checkAll = document.getElementById('check-all');
     const downloadImages = document.getElementById('download-images')
     const deleteImages = document.getElementById('delete-images');
+    const searchForm = document.getElementById('image-search')
 
     const defaultURLImage = '{{ image_default.url }}';
+
+    searchForm.addEventListener('submit', function(event){
+        event.preventDefault()
+
+        fetch(this.action + '?q=' + this.q.value )
+        .then(response => response.json())
+        .then(data => {
+            var table = document.getElementById('images');
+            
+            table.innerHTML = data.images.toString().replaceAll(',', '');
+            
+            registerEvents();
+            selelectDefaultImage();
+            
+        });
+        
+    })
 
     deleteImages.addEventListener("click", function(event){
         event.preventDefault()
@@ -196,90 +181,94 @@
         checkInputs();
     });
 
-    document.querySelectorAll('.image-checkbox').forEach(element => {
-        element.addEventListener('click', function(event){
-            checkInputs()
+    function registerEvents(){
+
+        document.querySelectorAll('.image-checkbox').forEach(element => {
+            element.addEventListener('click', function(event){
+                checkInputs()
+            });
         });
-    });
-    
-    document.querySelectorAll('.image-row').forEach(element => {
         
-        element.addEventListener('click', function(event){
-            selectRow(this)
-        })
-    });
-
-    document.querySelectorAll('.image-download').forEach(element => {
-        
-        element.addEventListener('click', function(event){
+        document.querySelectorAll('.image-row').forEach(element => {
             
-            event.preventDefault();
-
-            fetch(this.href, {
-                method: 'GET',
+            element.addEventListener('click', function(event){
+                selectRow(this)
             })
-            .then(response => response.blob())
-            .then(blob => {
+        });
 
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-        
-                a.download = 'image'; // blob.type;
-                document.body.appendChild(a);
-                a.click();
-
-                window.URL.revokeObjectURL(url);
-
-            });
+        document.querySelectorAll('.image-download').forEach(element => {
             
-        })
-    });
+            element.addEventListener('click', function(event){
+                
+                event.preventDefault();
 
-    document.querySelectorAll('.image-edit').forEach(element => {
-        
-        element.addEventListener('click', function(event){
+                fetch(this.href, {
+                    method: 'GET',
+                })
+                .then(response => response.blob())
+                .then(blob => {
+
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
             
-            imageId = this.getAttribute('image-Id');
-        
-            div = document.getElementById('image-name-' + imageId)
-            div.style.display = "none";
+                    a.download = 'image'; // blob.type;
+                    document.body.appendChild(a);
+                    a.click();
 
-            input = document.getElementById('image-input-name-' + imageId)
-            input.setAttribute("type", "text");
+                    window.URL.revokeObjectURL(url);
 
-        })
-    });
-
-    document.querySelectorAll('.image-form').forEach(element => {
-        element.addEventListener('submit', function(event){
-            event.preventDefault();
-
-            fetch(this.action, {
-            body: new FormData(this),
-            method: "POST"
+                });
+                
             })
-            .then(response => response.json())
-            .then(data => {
+        });
+
+        document.querySelectorAll('.image-edit').forEach(element => {
+            
+            element.addEventListener('click', function(event){
                 
-                imageId = this.getAttribute('image-id');
-                
-                input = document.getElementById('image-input-name-' + imageId);
+                imageId = this.getAttribute('image-Id');
+            
                 div = document.getElementById('image-name-' + imageId)
-                
-                input.setAttribute('type', 'hidden')
-                input.value = data.name;
+                div.style.display = "none";
 
-                div.innerHTML = data.name;
-                div.style.display = 'block';
+                input = document.getElementById('image-input-name-' + imageId)
+                input.setAttribute("type", "text");
 
-                input = document.getElementById('image-preview-' + imageId)
-                input.value = data.url
-                
-            });
-        })
-    });
+            })
+        });
+
+        document.querySelectorAll('.image-form').forEach(element => {
+            element.addEventListener('submit', function(event){
+                event.preventDefault();
+
+                fetch(this.action, {
+                body: new FormData(this),
+                method: "POST"
+                })
+                .then(response => response.json())
+                .then(data => {
+                    
+                    imageId = this.getAttribute('image-id');
+                    
+                    input = document.getElementById('image-input-name-' + imageId);
+                    div = document.getElementById('image-name-' + imageId)
+                    
+                    input.setAttribute('type', 'hidden')
+                    input.value = data.name;
+
+                    div.innerHTML = data.name;
+                    div.style.display = 'block';
+
+                    input = document.getElementById('image-preview-' + imageId)
+                    input.value = data.url
+                    
+                });
+            })
+        });
+    
+    }
 
     $('#deleteModal').on('show.bs.modal', function (event) {
         
@@ -301,6 +290,7 @@
     })
     
     selelectDefaultImage();
+    registerEvents();
 
 </script>
 {% endblock %}

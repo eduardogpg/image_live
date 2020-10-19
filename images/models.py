@@ -84,6 +84,14 @@ class Image(models.Model):
     @classmethod
     def default(self):
         return Image(bucket='livedjango', key='unnamed.png')
+    
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'url': self.url,
+            'name': self.name,
+        }
 
 def delete_mediafile_object(sender, instance, using, *args, **kwargs):
     if delete_mediafile(instance.bucket, instance.key) is None:

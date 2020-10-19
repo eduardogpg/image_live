@@ -7,6 +7,8 @@ from .views import update
 from .views import download
 from .views import ImageDetailView
 
+from .views import search
+
 from .views import delete_many
 from .views import download_many
 
@@ -20,6 +22,7 @@ urlpatterns = [
     path('update/<int:pk>', update, name='update'),
     path('download/<int:pk>', download, name='download'),
 
+    path('search', search, name='search'),
     path('delete/many', delete_many, name='delete_many'),
     path('download/many', download_many, name='download_many'),
 
