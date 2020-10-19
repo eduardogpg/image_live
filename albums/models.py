@@ -7,11 +7,9 @@ from django.contrib.auth.models import User
 class AlbumManager(models.Manager):
     
     def create_by_aws(self, bucket, title, description):
-        
         title_sanitaized = title.lower().replace(' ', '_')
-    
         key = create_folder(bucket, title_sanitaized)
-        
+
         if key:
             return Album.objects.create(title=title, key=key, bucket=bucket, description=description)
         

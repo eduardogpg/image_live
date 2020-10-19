@@ -15,7 +15,7 @@
 
 <div class="row">
     <div class="col">
-        <h2>{{ object.title }}</h2>
+        <h4> <a href="{% url 'albums:list' %}">Galería/</a> {{ object.title }}</h4>
     </div>
 </div>
 
@@ -65,7 +65,7 @@
                     <tr id="image-{{ image.id }}" class="image-row" image-id="{{ image.id }}">
                         <td>
                             <div class="form-check">
-                                <input type="checkbox" class="form-check-input image-checkbox">
+                                <input type="checkbox" class="form-check-input image-checkbox" image-id='{{ image.id }}'>
                             </div>
                         </td>
                         <td>
@@ -102,7 +102,7 @@
 
     </div>
     <div class="col">
-        <img width="300" height="300" id="image-preview" src="{{ image.url }}" class="img-responsive" style="padding-top: 5px">
+        <img width="300" height="300" id="image-preview" src="#" class="img-responsive" style="padding-top: 5px">
     </div>
 </div>
 
@@ -116,8 +116,41 @@
     const downloadImages = document.getElementById('download-images')
     const deleteImages = document.getElementById('delete-images');
 
+    const defaultURLImage = '{{ image_default.url }}';
+
+    deleteImages.addEventListener("click", function(event){
+        event.preventDefault()
+
+        var ids = []
+        var images = document.querySelectorAll('input.image-checkbox[type="checkbox"]:checked')
+        
+        for (var i = 0; i < images.length; i+=1) {
+            ids.push(images[i].getAttribute('image-id'))
+        }
+
+        fetch(this.href, {
+            method: 'POST',
+            body: JSON.stringify({
+                'ids': ids
+            })
+        })
+        .then(response => response.json())
+        .then(function(data){
+            
+            for (var i = 0; i < data.images_deleted.length; i+=1) {
+                var imageId = data.images_deleted[i]
+                var image = document.getElementById('image-' + imageId).remove();
+            } 
+            
+            selelectDefaultImage()
+        });
+
+        checkAll.checked = false;
+
+    });
+
     function checkInputs(){
-        if (document.querySelectorAll('input[type="checkbox"]:checked').length >= 2){
+        if (document.querySelectorAll('input.image-checkbox[type="checkbox"]:checked').length >= 2){
             
             downloadImages.classList.remove("disabled");
             deleteImages.classList.remove("disabled");
@@ -127,6 +160,33 @@
             downloadImages.classList.add('disabled');
             deleteImages.classList.add('disabled');
         }
+    }
+
+    function selectRow(row) {
+        var imageId = row.getAttribute('image-id');
+        var imagePreview = document.getElementById('image-preview-' + imageId);
+    
+        preview.src = imagePreview.value;
+
+        document.querySelectorAll('.table-active').forEach(element => {
+            element.classList.remove('table-active');
+        });
+
+        var tr = document.getElementById('image-' + imageId)
+        tr.classList.add('table-active')
+    }
+
+    function selelectDefaultImage(){
+        var rows = document.getElementsByTagName("tr");
+        
+        if (rows.length >= 2){  
+            selectRow(rows[1]);
+        } else {
+            preview.src = defaultURLImage;
+        }
+
+        downloadImages.classList.add('disabled');
+        deleteImages.classList.add('disabled');
     }
 
     checkAll.addEventListener('change', function(event){
@@ -145,17 +205,7 @@
     document.querySelectorAll('.image-row').forEach(element => {
         
         element.addEventListener('click', function(event){
-            var imageId = this.getAttribute('image-id');
-            var imagePreview = document.getElementById('image-preview-' + imageId);
-        
-            preview.src = imagePreview.value;
-
-            document.querySelectorAll('.table-active').forEach(element => {
-                element.classList.remove('table-active');
-            });
-
-            var tr = document.getElementById('image-' + imageId)
-            tr.classList.add('table-active')
+            selectRow(this)
         })
     });
 
@@ -249,6 +299,8 @@
         });
     
     })
+    
+    selelectDefaultImage();
 
 </script>
 {% endblock %}

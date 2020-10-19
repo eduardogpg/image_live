@@ -81,6 +81,10 @@ class Image(models.Model):
         from hurry.filesize import size
         return size(self.size)
 
+    @classmethod
+    def default(self):
+        return Image(bucket='livedjango', key='unnamed.png')
+
 def delete_mediafile_object(sender, instance, using, *args, **kwargs):
     if delete_mediafile(instance.bucket, instance.key) is None:
         raise Exception('Do not delete')

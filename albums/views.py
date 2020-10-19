@@ -12,6 +12,7 @@ from images.forms import UploadFileForm
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Album
+from images.models import Image
 
 class AlbumListView(ListView):
     model = Album
@@ -31,12 +32,18 @@ class AlbumDetailView(DetailView):
     model = Album
     template_name = 'albums/detail.html'
 
+    def ge_defaul_image(self):
+        if self.get_object().images:
+            return self.get_object().first()
+        else:
+            return Image.obje
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
         context['title'] = self.get_object().title
-        context['image'] = self.get_object().images.first()
         context['images'] = self.get_object().images
+        context['image_default'] = Image.default()
         context['form'] = UploadFileForm(
             {
                 'album_id': self.get_object().id
@@ -47,11 +54,11 @@ class AlbumDetailView(DetailView):
 
 def create(request):
     if request.method == 'POST':
-        if request.POST.get('title') and request.POST.get('description'):
-        
+        if request.POST.get('title'):
+            
             album = Album.objects.create_by_aws('livedjango',
                                                 request.POST['title'],
-                                                request.POST['description'])
+                                                request.POST.get('description', ''))
             
             if album:
                 messages.success(request, 'Albúm creado exitosamente.')

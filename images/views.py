@@ -112,6 +112,8 @@ def download(request, pk):
 
 @csrf_exempt
 def delete_many(request):
+    images_deleted = list()
+    
     if request.method == 'POST':
         payload = json.loads(request.body)
         images_deleted = [Image.objects.delete_by_id(id) for id in payload.get('ids', []) ]
